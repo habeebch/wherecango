@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhereCanIGo — Real Visa Eligibility Checker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7f8fa;color:#1a1a2e;min-height:100vh}
+
+.header{background:#fff;border-bottom:1px solid #e8e8e8;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.logo{font-size:20px;font-weight:800;color:#1a1a2e}.logo span{color:#1D9E75}
+.header-tag{font-size:12px;background:#E1F5EE;color:#0F6E56;padding:4px 10px;border-radius:20px;font-weight:600}
+
+.hero{text-align:center;padding:60px 24px 40px;max-width:680px;margin:0 auto}
+.hero-globe{font-size:52px;margin-bottom:12px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.2;margin-bottom:12px}
+.hero h1 span{color:#1D9E75}
+.hero p{font-size:16px;color:#666;line-height:1.6;margin-bottom:28px}
+.hero-note{background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400E;margin-bottom:28px;text-align:left}
+.hero-note strong{display:block;margin-bottom:4px}
+.hero-stats{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:36px}
+.stat{text-align:center}.stat-num{font-size:26px;font-weight:800;color:#1D9E75}.stat-label{font-size:12px;color:#888}
+.start-btn{display:inline-block;padding:16px 44px;background:#1D9E75;color:#fff;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s}
+.start-btn:hover{background:#0F6E56;transform:translateY(-1px)}
+
+.quiz-wrap{display:none;max-width:580px;margin:0 auto;padding:32px 24px}
+.progress-info{display:flex;justify-content:space-between;margin-bottom:6px}
+.progress-label{font-size:13px;color:#888}
+.progress-bar{height:5px;background:#e8e8e8;border-radius:3px;margin-bottom:28px;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:3px;transition:width 0.4s}
+.back-btn{background:none;border:none;color:#888;font-size:14px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:4px}
+.q-step{font-size:11px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.q-text{font-size:22px;font-weight:700;margin-bottom:4px;line-height:1.3}
+.q-sub{font-size:13px;color:#888;margin-bottom:20px}
+.options{display:flex;flex-direction:column;gap:8px}
+.options.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.option{padding:13px 16px;border:2px solid #e8e8e8;border-radius:12px;cursor:pointer;font-size:14px;color:#1a1a2e;background:#fff;transition:all 0.15s;display:flex;align-items:center;gap:10px;font-family:inherit;text-align:left;width:100%}
+.option:hover{border-color:#1D9E75;background:#f0faf6}
+.option.selected{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56;font-weight:600}
+.opt-icon{width:28px;height:28px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#888}
+.option.selected .opt-icon{background:#1D9E75;color:#fff}
+.text-input{width:100%;padding:13px 16px;border:2px solid #e8e8e8;border-radius:12px;font-size:15px;color:#1a1a2e;background:#fff;font-family:inherit;outline:none;transition:border 0.15s}
+.text-input:focus{border-color:#1D9E75}
+.next-btn{margin-top:20px;width:100%;padding:14px;background:#1D9E75;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.next-btn:hover{background:#0F6E56}
+.next-btn:disabled{opacity:0.35;cursor:not-allowed}
+
+.loading-wrap{display:none;text-align:center;padding:80px 24px;max-width:500px;margin:0 auto}
+.spinner{width:48px;height:48px;border:4px solid #e8e8e8;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.loading-sub{font-size:14px;color:#888;margin-bottom:28px}
+.loading-checks{display:flex;flex-direction:column;gap:6px;text-align:left;max-width:340px;margin:0 auto}
+.lcheck{font-size:13px;color:#bbb;display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;transition:color 0.4s}
+.lcheck.done{color:#1D9E75;font-weight:500}
+.lcheck .dot{width:8px;height:8px;border-radius:50%;background:#e0e0e0;flex-shrink:0}
+.lcheck.done .dot{background:#1D9E75}
+
+.results-wrap{display:none;max-width:720px;margin:0 auto;padding:28px 24px}
+.results-header{text-align:center;margin-bottom:24px}
+.results-header h2{font-size:26px;font-weight:800;margin-bottom:6px}
+.results-header p{font-size:14px;color:#888}
+
+.score-summary{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px;margin-bottom:20px}
+.score-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.score-badge{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700}
+.score-strong{background:#E1F5EE;color:#0F6E56}
+.score-medium{background:#FEF3C7;color:#92400E}
+.score-weak{background:#FEE2E2;color:#991B1B}
+.profile-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{padding:4px 10px;background:#f5f5f5;border-radius:20px;font-size:12px;color:#555}
+
+.section-title{font-size:16px;font-weight:700;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
+
+/* ELIGIBLE CARDS */
+.visa-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;overflow:hidden;margin-bottom:14px}
+.visa-card.top{border:2px solid #1D9E75}
+.visa-card-header{padding:16px 20px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid #f5f5f5}
+.country-flag{font-size:28px;flex-shrink:0}
+.visa-info{flex:1}
+.visa-country{font-size:16px;font-weight:700}
+.visa-name{font-size:13px;color:#1D9E75;font-weight:600;margin-top:1px}
+.visa-right{text-align:right;flex-shrink:0}
+.approval-num{font-size:22px;font-weight:800}
+.approval-high{color:#1D9E75}
+.approval-med{color:#F59E0B}
+.approval-low{color:#EF4444}
+.approval-tag{font-size:11px;color:#888}
+.approval-bar{width:80px;height:6px;background:#e8e8e8;border-radius:3px;margin-top:4px;overflow:hidden;margin-left:auto}
+.bar-fill{height:100%;border-radius:3px}
+.bar-high{background:#1D9E75}
+.bar-med{background:#F59E0B}
+.bar-low{background:#EF4444}
+
+.visa-card-body{padding:16px 20px}
+.free-req-list{margin-bottom:12px}
+.free-req{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:6px}
+.req-num{width:18px;height:18px;border-radius:50%;background:#E1F5EE;color:#0F6E56;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.meta-tag{padding:4px 10px;background:#f5f5f5;border-radius:16px;font-size:12px;color:#555;font-weight:500}
+.meta-tag.g{background:#E1F5EE;color:#0F6E56}
+.meta-tag.o{background:#FEF3C7;color:#92400E}
+.meta-tag.r{background:#FEE2E2;color:#991B1B}
+
+/* LOCKED */
+.locked-box{background:#f9f9f9;border:1.5px dashed #ddd;border-radius:12px;padding:18px;text-align:center}
+.lock-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.lock-sub{font-size:12px;color:#888;margin-bottom:12px}
+.lock-items{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;text-align:left}
+.lock-line{height:13px;background:#e5e5e5;border-radius:3px;position:relative;overflow:hidden}
+.lock-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.7),transparent);animation:sh 1.8s infinite}
+@keyframes sh{to{left:100%}}
+.w70{width:70%}.w85{width:85%}.w60{width:60%}.w90{width:90%}.w50{width:50%}
+.unlock-btn{display:inline-block;padding:10px 24px;background:#1D9E75;color:#fff;border-radius:24px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;transition:all 0.2s}
+.unlock-btn:hover{background:#0F6E56}
+
+/* NOT ELIGIBLE */
+.not-eligible-card{background:#fff;border:1px solid #FEE2E2;border-radius:14px;padding:16px 20px;margin-bottom:10px}
+.ne-header{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.ne-flag{font-size:24px}
+.ne-country{font-size:15px;font-weight:700}
+.ne-visa{font-size:12px;color:#888;margin-top:1px}
+.ne-badge{margin-left:auto;background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px}
+.reason-list{display:flex;flex-direction:column;gap:5px}
+.reason{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#666}
+.reason-x{color:#EF4444;font-weight:700;font-size:14px;flex-shrink:0}
+
+/* IMPROVEMENTS */
+.improve-card{background:#fff;border:1px solid #FEF3C7;border-left:4px solid #F59E0B;border-radius:12px;padding:16px 20px;margin-bottom:10px}
+.improve-header{font-size:14px;font-weight:700;color:#92400E;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.improve-list{display:flex;flex-direction:column;gap:6px}
+.improve-item{font-size:13px;color:#555;display:flex;gap:8px;align-items:flex-start}
+.improve-arrow{color:#F59E0B;font-weight:700;flex-shrink:0}
+.improve-result{font-size:12px;color:#1D9E75;font-weight:600;margin-top:2px}
+
+/* NO OPTIONS */
+.no-options{background:#fff;border:1px solid #FEE2E2;border-radius:14px;padding:24px;text-align:center}
+.no-opt-icon{font-size:36px;margin-bottom:10px}
+.no-opt-title{font-size:18px;font-weight:700;margin-bottom:6px;color:#991B1B}
+.no-opt-sub{font-size:14px;color:#666;line-height:1.5}
+
+/* UPSELL */
+.upsell-box{background:linear-gradient(135deg,#0F2027,#0F6E56);border-radius:18px;padding:28px;text-align:center;color:#fff;margin:28px 0}
+.upsell-box h3{font-size:20px;font-weight:800;margin-bottom:8px}
+.upsell-box p{font-size:14px;opacity:0.85;margin-bottom:20px;line-height:1.5}
+.upsell-features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;text-align:left}
+.uf{display:flex;align-items:flex-start;gap:6px;font-size:13px;opacity:0.9}
+.uf-check{color:#5DCAA5;font-weight:700;flex-shrink:0}
+.upsell-price{font-size:32px;font-weight:800}
+.upsell-sub{font-size:12px;opacity:0.7;margin-bottom:18px}
+.buy-btn{display:inline-block;padding:14px 36px;background:#fff;color:#0F2027;border-radius:40px;font-size:15px;font-weight:800;text-decoration:none;transition:all 0.2s}
+.buy-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+
+.restart-btn{display:block;margin:20px auto 0;background:none;border:none;color:#888;font-size:14px;cursor:pointer;font-family:inherit}
+
+@media(max-width:580px){
+.hero h1{font-size:26px}
+.options.grid2{grid-template-columns:1fr}
+.upsell-features{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Where<span>CanIGo</span></div>
+  <div class="header-tag">Real Eligibility • No Fake Results</div>
+</div>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero">
+    <div class="hero-globe">🌍</div>
+    <h1>Find Where You Can <span>Actually Move</span></h1>
+    <p>Real visa eligibility check based on your actual profile. We check every requirement honestly — if you don't qualify, we tell you exactly why and what to do about it.</p>
+    <div class="hero-note">
+      <strong>⚠️ Honest results only</strong>
+      Unlike other tools, if your profile doesn't meet a visa's requirements, we will tell you. We also show you exactly what to improve to unlock more options.
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">12</div><div class="stat-label">Countries</div></div>
+      <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Visa Types</div></div>
+      <div class="stat"><div class="stat-num">Real</div><div class="stat-label">Requirements</div></div>
+      <div class="stat"><div class="stat-num">Honest</div><div class="stat-label">Results</div></div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Check my eligibility →</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz">
+  <div id="quiz-inner"></div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-wrap" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-title">Checking your eligibility...</div>
+  <div class="loading-sub">Checking every visa requirement against your profile</div>
+  <div class="loading-checks">
+    <div class="lcheck" id="lc1"><div class="dot"></div>Checking income against visa minimums</div>
+    <div class="lcheck" id="lc2"><div class="dot"></div>Verifying savings vs bank statement requirements</div>
+    <div class="lcheck" id="lc3"><div class="dot"></div>Matching education to skilled worker criteria</div>
+    <div class="lcheck" id="lc4"><div class="dot"></div>Checking age eligibility for each visa category</div>
+    <div class="lcheck" id="lc5"><div class="dot"></div>Calculating approval chances by nationality</div>
+    <div class="lcheck" id="lc6"><div class="dot"></div>Generating profile improvement suggestions</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-wrap" id="results"></div>
+
+<script>
+const GUMROAD = 'https://gujjarhabib.gumroad.com/l/rxeojf';
+
+// ─── QUIZ STEPS ───────────────────────────────────────────────────────────────
+const steps = [
+  {id:'nationality',type:'text',q:'What is your primary nationality?',sub:'Your passport country is the single biggest factor in visa approvals',ph:'e.g. Pakistani, Indian, Nigerian, Egyptian, Filipino...'},
+  {id:'other_passport',type:'opts',q:'Do you hold any other passports?',sub:'Dual nationality can dramatically change your options',opts:['No, one passport only','Yes — I have 2 passports','Yes — I have 3+ passports']},
+  {id:'current_country',type:'text',q:'Which country do you currently live in?',sub:'Your country of residence determines which embassy you apply at',ph:'e.g. Pakistan, UAE, Saudi Arabia, UK, Germany...'},
+  {id:'age',type:'opts',q:'What is your age?',sub:'Age is a hard cutoff for working holidays and affects points systems',opts:['18–25','26–30','31–35','36–40','41–50','51+'],grid:true},
+  {id:'education',type:'opts',q:'Highest education level completed?',sub:'Many skilled worker visas require a recognized degree',opts:['No formal degree','High school / O-levels / Matric','College diploma / A-levels','Bachelor\'s degree (4 years)','Master\'s degree','PhD / Doctorate']},
+  {id:'field',type:'opts',q:'What is your field of work or study?',sub:'Certain fields are on global shortage lists — this matters a lot',opts:['Technology / IT / Software','Healthcare / Medicine / Nursing','Engineering / Construction','Finance / Accounting','Education / Teaching','Business / Management','Hospitality / Food service','Trade / Skilled labor','Other / Not listed']},
+  {id:'experience',type:'opts',q:'How many years of paid work experience?',sub:'Experience is scored heavily in Canada, Australia, and UK points systems',opts:['None (student)','Less than 1 year','1–2 years','3–5 years','6–10 years','More than 10 years'],grid:true},
+  {id:'monthly_income',type:'opts',q:'What is your current monthly income (USD)?',sub:'This is checked against minimum income requirements — be accurate',opts:['I have no income / student','Under $500/month','$500–$1,000/month','$1,000–$2,000/month','$2,000–$4,000/month','$4,000–$7,000/month','Over $7,000/month']},
+  {id:'savings',type:'opts',q:'Total savings / funds available (USD)?',sub:'Bank statements are required for almost every visa — be honest',opts:['Under $1,000','$1,000–$3,000','$3,000–$8,000','$8,000–$20,000','$20,000–$50,000','Over $50,000'],grid:true},
+  {id:'english',type:'opts',q:'What is your English language level?',sub:'Many countries require IELTS/PTE proof — self-assess honestly',opts:['No English','Basic (can understand simple sentences)','Intermediate (can hold a conversation)','Upper-intermediate (IELTS 5.5–6.0 equivalent)','Advanced (IELTS 6.5–7.0 equivalent)','Proficient (IELTS 7.5+ / Native)']},
+  {id:'goal',type:'opts',q:'What is your main immigration goal?',sub:'This determines which visa categories are most relevant to you',opts:['🏖️ Visit / Tourism only','💼 Work abroad (get employed)','🎓 Study abroad','🏡 Settle permanently / get citizenship','💻 Work remotely (digital nomad)','💰 Invest / start a business','👨‍👩‍👧 Join family abroad']},
+  {id:'criminal',type:'opts',q:'Do you have any criminal record?',sub:'Any criminal record can disqualify you from certain countries',opts:['No criminal record','Minor offense (no imprisonment)','Criminal record with conviction']},
+];
+
+let current = 0;
+let answers = {};
+
+// ─── REAL VISA DATABASE ────────────────────────────────────────────────────────
+// Each visa has real requirements with numeric thresholds for engine to check
+const VISAS = [
+  // ════════════════ UK ════════════════
+  {
+    country:'United Kingdom', flag:'🇬🇧',
+    name:'Skilled Worker Visa',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:2200,      // £26,200/year = ~$2,183/month
+      min_savings_usd:945,      // £945 in bank for 28 days
+      min_education:'bachelor', // degree required usually
+      english_min:4,            // Upper-intermediate minimum
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Job offer from UK-licensed sponsor employer',
+      'Minimum salary £26,200/year (~$2,200/month)',
+      'English language proof (IELTS equivalent)'
+    ],
+    bank_statement:'£945 held continuously for 28 days before applying',
+    bank_months:'28 consecutive days (not months — days)',
+    documents:['Certificate of Sponsorship from employer','Valid passport (6+ months)','IELTS or approved English test','TB test (Pakistan/India/Bangladesh/Nigeria/Ghana/Kenya)','£945 savings proof (28-day bank statement)','Police clearance certificate','Academic certificates'],
+    processing:'3–8 weeks',
+    fee:'£719 (up to 3 years) + £1,035/year Immigration Health Surcharge',
+    pr_path:'5 years on Skilled Worker → ILR (Indefinite Leave to Remain) → British citizenship after 12 months ILR',
+    refusal_reasons:['Salary below £26,200/year','Certificate of Sponsorship missing or invalid','English test below required level','TB test not done','Previous UK visa refusal/overstay'],
+    approval:{Pakistani:55,Indian:68,Nigerian:40,Bangladeshi:50,Egyptian:52,Filipino:62,Ghanaian:38,Kenyan:48,Indonesian:57,Brazilian:61,Chinese:65,Russian:62,Ukrainian:66,Moroccan:47,Turkish:58,Other:50}
+  },
+  {
+    country:'United Kingdom', flag:'🇬🇧',
+    name:'Student Visa',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:9207,     // £9,207 outside London / £12,006 London
+      min_education:'secondary',
+      english_min:3,            // Intermediate minimum
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Unconditional offer from UKVI-approved university',
+      'English: IELTS 5.5–6.5 (depends on course)',
+      'Funds: £9,207–£12,006 + tuition fees'
+    ],
+    bank_statement:'£9,207 (outside London) or £12,006 (London) + full tuition fees — all shown for 28 consecutive days',
+    bank_months:'28 consecutive days',
+    documents:['CAS (Confirmation of Acceptance) number from university','Valid passport','IELTS/English test results','Bank statements (28 days showing full amount)','Academic transcripts and certificates','TB test (most Asian/African nationalities)','Passport photos'],
+    processing:'3–6 weeks',
+    fee:'£363 + £470/year Immigration Health Surcharge',
+    pr_path:'Graduate Visa (2yr work) → Skilled Worker → 5 years → ILR → Citizenship',
+    refusal_reasons:['Funds below requirement','English score too low','Weak study intentions (SOP)','TB test not done','Previous refusal history','University not UKVI-approved'],
+    approval:{Pakistani:52,Indian:65,Nigerian:38,Bangladeshi:47,Egyptian:49,Filipino:60,Ghanaian:36,Kenyan:44,Indonesian:54,Brazilian:59,Chinese:63,Russian:60,Ukrainian:64,Moroccan:44,Turkish:56,Other:48}
+  },
+  {
+    country:'United Kingdom', flag:'🇬🇧',
+    name:'Visitor Visa',
+    goal:['visit'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:1500,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Strong ties to home country (job, property, family)',
+      'Sufficient funds for trip (approx £50/day)',
+      'Return flight and accommodation booked'
+    ],
+    bank_statement:'£1,000–£3,000 typically — 3–6 months of statements showing consistent balance',
+    bank_months:'3–6 months',
+    documents:['Valid passport (6+ months)','3–6 months bank statements','Employment letter and payslips','Accommodation proof in UK','Return flight reservation','Invitation letter (if visiting family/friends)','Property ownership documents (shows ties)','Previous travel documents'],
+    processing:'3–6 weeks (up to 12 weeks)',
+    fee:'£115 (6 months)',
+    pr_path:'None — visitor visa does not lead to settlement',
+    refusal_reasons:['Insufficient funds','Weak ties to home country','No clear purpose of visit','Previous refusal or overstay','Missing documents'],
+    approval:{Pakistani:32,Indian:50,Nigerian:22,Bangladeshi:30,Egyptian:36,Filipino:42,Ghanaian:20,Kenyan:28,Indonesian:38,Brazilian:48,Chinese:44,Russian:50,Ukrainian:54,Moroccan:32,Turkish:40,Other:35}
+  },
+  {
+    country:'United Kingdom', flag:'🇬🇧',
+    name:'Graduate Visa (Post-Study)',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:0,
+      min_education:'bachelor',
+      english_min:0,
+      age_max:999,
+      criminal:false,
+      special:'must_have_uk_degree'
+    },
+    free_reqs:[
+      'Must have COMPLETED a UK degree at UKVI-approved university',
+      'No job offer needed',
+      'No minimum salary'
+    ],
+    bank_statement:'No bank statement requirement',
+    bank_months:'N/A',
+    documents:['Valid passport','Proof of completed UK degree','UK Visas and Immigration letter'],
+    processing:'1–2 weeks',
+    fee:'£715',
+    pr_path:'Switch to Skilled Worker while on Graduate Visa → ILR after 5 years',
+    refusal_reasons:['Did not complete UK degree','Degree not from UKVI-approved institution','Immigration violations during studies'],
+    approval:{Pakistani:88,Indian:90,Nigerian:85,Bangladeshi:87,Egyptian:86,Filipino:88,Ghanaian:84,Kenyan:86,Indonesian:87,Brazilian:89,Chinese:91,Russian:90,Ukrainian:92,Moroccan:85,Turkish:87,Other:87}
+  },
+  {
+    country:'United Kingdom', flag:'🇬🇧',
+    name:'Family Visa (Spouse/Partner)',
+    goal:['family'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:1,            // A1 minimum
+      age_max:999,
+      criminal:false,
+      special:'sponsor_in_uk'
+    },
+    free_reqs:[
+      'UK partner must be British citizen or settled (ILR/EU Settled)',
+      'Sponsor earns minimum £29,000/year (2024)',
+      'English language test: A1 level minimum',
+      'Genuine relationship proven'
+    ],
+    bank_statement:'Sponsor\'s 6 months payslips showing £29,000+/year income',
+    bank_months:'6 months payslips from UK sponsor',
+    documents:['Marriage/civil partnership certificate','Sponsor\'s payslips (6 months)','Sponsor\'s passport / BRP','Proof of cohabitation','English language test (A1)','Accommodation proof','Relationship evidence (photos, messages, joint accounts)'],
+    processing:'8–24 weeks',
+    fee:'£1,846',
+    pr_path:'2.5 years → ILR → British citizenship after 12 months',
+    refusal_reasons:['Sponsor income below £29,000','English below A1','Fake/weak relationship evidence','Accommodation below required standard'],
+    approval:{Pakistani:62,Indian:70,Nigerian:55,Bangladeshi:60,Egyptian:58,Filipino:66,Ghanaian:52,Kenyan:57,Indonesian:61,Brazilian:68,Chinese:67,Russian:69,Ukrainian:71,Moroccan:56,Turkish:62,Other:60}
+  },
+
+  // ════════════════ CANADA ════════════════
+  {
+    country:'Canada', flag:'🇨🇦',
+    name:'Express Entry — Federal Skilled Worker',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:13757,    // CAD $13,757 proof of funds
+      min_education:'bachelor',
+      english_min:4,            // IELTS 6.0 minimum
+      age_max:999,
+      criminal:false,
+      min_experience_years:1
+    },
+    free_reqs:[
+      'Minimum 1 year skilled work experience (NOC TEER 0/1/2/3)',
+      'IELTS minimum 6.0 in each band',
+      'Educational Credential Assessment (ECA) from WES',
+      'Proof of funds: CAD $13,757 (single)'
+    ],
+    bank_statement:'CAD $13,757 (~$10,000 USD) — recent bank letter or statements confirming current balance',
+    bank_months:'Recent (no specific duration) — just current available balance',
+    documents:['Valid passport','IELTS results (all 4 bands 6.0+)','WES ECA report','Work experience letters (on company letterhead, duties listed)','Proof of funds letter from bank','Police clearance (all countries lived 6+ months)','Medical exam from IRCC-approved doctor','Reference letters'],
+    processing:'6–12 months after Invitation to Apply (ITA)',
+    fee:'CAD $1,365 (~$1,000 USD) + $150 biometrics',
+    pr_path:'Direct Permanent Residence → Canadian citizenship after 3 years PR',
+    refusal_reasons:['CRS score below invitation round cut-off (typically 480–530)','Work experience not documented properly','Misrepresentation','Medical inadmissibility','IELTS below 6.0 in any band'],
+    approval:{Pakistani:68,Indian:75,Nigerian:56,Bangladeshi:62,Egyptian:60,Filipino:70,Ghanaian:54,Kenyan:58,Indonesian:61,Brazilian:65,Chinese:67,Russian:63,Ukrainian:66,Moroccan:57,Turkish:62,Other:60}
+  },
+  {
+    country:'Canada', flag:'🇨🇦',
+    name:'Student Permit',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:15000,    // $10,000 living + tuition
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Acceptance from DLI (Designated Learning Institution)',
+      'English: IELTS 6.0 typically (varies by institution)',
+      'Funds: CAD $10,000/year living + full tuition fees'
+    ],
+    bank_statement:'CAD $10,000/year living expenses PLUS first year tuition fees — 6 months bank statements',
+    bank_months:'6 months showing consistent balance',
+    documents:['DLI Acceptance Letter','Valid passport','IELTS results','Bank statements (6 months)','Statement of Purpose (SOP) — crucial','Financial sponsor letter (if family supporting)','Police clearance (some nationalities)','Medical exam (if from designated country)'],
+    processing:'4–16 weeks (varies by nationality — Pakistani/Nigerian typically longer)',
+    fee:'CAD $150 (~$110 USD)',
+    pr_path:'Post-Graduation Work Permit (1–3 years) → Express Entry → PR → Citizenship',
+    refusal_reasons:['Weak SOP — examiner not convinced of genuine study intent','Insufficient funds','Weak ties to home country','Previous refusal','IELTS below requirement','No clear career plan'],
+    approval:{Pakistani:45,Indian:58,Nigerian:36,Bangladeshi:42,Egyptian:46,Filipino:61,Ghanaian:34,Kenyan:42,Indonesian:50,Brazilian:57,Chinese:55,Russian:58,Ukrainian:62,Moroccan:42,Turkish:50,Other:46}
+  },
+  {
+    country:'Canada', flag:'🇨🇦',
+    name:'Visitor Visa (TRV)',
+    goal:['visit'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:3000,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Strong ties to home country',
+      'CAD $2,500–$5,000 in savings per person',
+      'Clear travel purpose and return ticket'
+    ],
+    bank_statement:'CAD $2,500–$5,000 per person — 3–6 months bank statements',
+    bank_months:'3–6 months',
+    documents:['Valid passport','Bank statements (3–6 months)','Employment letter','Invitation letter (if applicable)','Return flight','Property/family ties proof','Travel history'],
+    processing:'2–8 weeks',
+    fee:'CAD $100',
+    pr_path:'None',
+    refusal_reasons:['Weak ties','Insufficient funds','Previous refusal','Overstay risk'],
+    approval:{Pakistani:36,Indian:52,Nigerian:24,Bangladeshi:33,Egyptian:36,Filipino:46,Ghanaian:22,Kenyan:30,Indonesian:40,Brazilian:50,Chinese:46,Russian:48,Ukrainian:52,Moroccan:32,Turkish:42,Other:36}
+  },
+
+  // ════════════════ AUSTRALIA ════════════════
+  {
+    country:'Australia', flag:'🇦🇺',
+    name:'Skilled Independent Visa (189)',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:0,
+      min_education:'bachelor',
+      english_min:4,            // IELTS 6.0 min
+      age_max:44,               // Must be under 45
+      criminal:false,
+      min_experience_years:1,
+      special:'skills_assessment_needed'
+    },
+    free_reqs:[
+      'Score 65+ points on Australian points test',
+      'Occupation on MLTSSL (Medium and Long-term Strategic Skills List)',
+      'IELTS 6.0 each band (or equivalent)',
+      'Under 45 years old',
+      'Skills assessment from relevant authority (ACS, AHPRA, etc.)'
+    ],
+    bank_statement:'No specific funds requirement — but must show ability to settle',
+    bank_months:'N/A',
+    documents:['Valid passport','Skills assessment from approved body','IELTS/PTE results','Points test evidence','Police clearance (all countries 12+ months in 10 years)','Medical exam from IRCA panel physician','Employment references'],
+    processing:'6–24 months (depends on invitation round)',
+    fee:'AUD $4,640 (~$3,000 USD)',
+    pr_path:'Direct Permanent Residence from Day 1 → Australian citizenship after 4 years (1 year as PR)',
+    refusal_reasons:['Points below invitation cut-off','Skills assessment rejected','Health issues','Character issues','Age over 44','Occupation not on skills list'],
+    approval:{Pakistani:60,Indian:68,Nigerian:50,Bangladeshi:55,Egyptian:53,Filipino:64,Ghanaian:48,Kenyan:53,Indonesian:57,Brazilian:60,Chinese:62,Russian:58,Ukrainian:61,Moroccan:51,Turkish:57,Other:55}
+  },
+  {
+    country:'Australia', flag:'🇦🇺',
+    name:'Employer Sponsored (482 TSS)',
+    goal:['work'],
+    requires:{
+      min_income_usd:4500,      // AUD $73,150/year = ~$4,100/month
+      min_savings_usd:0,
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false,
+      min_experience_years:2
+    },
+    free_reqs:[
+      'Job offer from Australian-approved sponsor',
+      'Occupation on relevant skills list',
+      'Minimum salary AUD $73,150/year (~$4,100/month)',
+      'IELTS 5.0 each band minimum',
+      '2 years relevant work experience'
+    ],
+    bank_statement:'No bank statement — employer handles sponsorship',
+    bank_months:'N/A',
+    documents:['Sponsorship nomination from employer','Valid passport','IELTS results','Work experience proof','Police clearance','Medical exam'],
+    processing:'1–6 months',
+    fee:'AUD $3,115 (~$2,000 USD)',
+    pr_path:'After 3 years → Employer Nomination Scheme (186) → PR → Citizenship',
+    refusal_reasons:['Sponsor not approved','Salary below TSMIT','Skills mismatch'],
+    approval:{Pakistani:64,Indian:70,Nigerian:54,Bangladeshi:58,Egyptian:57,Filipino:68,Ghanaian:50,Kenyan:56,Indonesian:61,Brazilian:63,Chinese:65,Russian:61,Ukrainian:64,Moroccan:53,Turkish:59,Other:57}
+  },
+  {
+    country:'Australia', flag:'🇦🇺',
+    name:'Student Visa (500)',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:18000,    // AUD $21,041 + tuition
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Enrolment in CRICOS-registered course',
+      'Genuine Temporary Entrant (GTE) requirement',
+      'Funds: AUD $21,041/year living + full tuition'
+    ],
+    bank_statement:'AUD $21,041 (~$13,700 USD) living expenses PLUS full tuition — 3–6 months bank statements',
+    bank_months:'3–6 months',
+    documents:['Confirmation of Enrolment (CoE)','Valid passport','IELTS/PTE results','GTE statement (critical — explains why Australia, why this course)','Bank statements','OSHC health insurance','Police clearance (some nationalities)'],
+    processing:'1–4 months',
+    fee:'AUD $710 (~$460 USD)',
+    pr_path:'Post-Study Work (485 visa) → Skilled visa → PR → Citizenship',
+    refusal_reasons:['Weak GTE statement','Insufficient funds','Poor English','No genuine study intention'],
+    approval:{Pakistani:46,Indian:60,Nigerian:38,Bangladeshi:44,Egyptian:46,Filipino:58,Ghanaian:36,Kenyan:42,Indonesian:52,Brazilian:55,Chinese:57,Russian:58,Ukrainian:62,Moroccan:42,Turkish:51,Other:47}
+  },
+
+  // ════════════════ SCHENGEN ════════════════
+  {
+    country:'Schengen Area (26 EU countries)', flag:'🇪🇺',
+    name:'Short Stay Visa (C) — Tourist/Visitor',
+    goal:['visit'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:1500,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Valid passport with 3+ months beyond intended stay',
+      'Travel insurance: €30,000 minimum coverage',
+      'Proof of accommodation + return flight'
+    ],
+    bank_statement:'€50–€100 per day of stay — e.g. 30-day trip = €1,500–€3,000. 3–6 months bank statements',
+    bank_months:'3–6 months of complete bank statements',
+    documents:['Valid passport (2 blank pages minimum)','2 Schengen-format passport photos','Travel insurance (€30,000 minimum)','Flight reservation (return)','Hotel/accommodation proof','Bank statements (3–6 months)','Employment letter on company letterhead','Salary/income proof','NOC from employer','Property documents showing ties to home country','Tax returns (previous year)','Previous Schengen visa copies (if any)'],
+    processing:'10–15 working days (up to 45 days legally)',
+    fee:'€90 adults, €45 children (6–12 years)',
+    pr_path:'None — tourist visa cannot lead to residence',
+    refusal_reasons:['Insufficient funds (most common reason)','No strong ties to home country','Incomplete documents','Previous refusal or overstay','Suspicion of intending to stay permanently','Weak cover letter','No travel insurance'],
+    approval:{Pakistani:42,Indian:58,Nigerian:26,Bangladeshi:35,Egyptian:40,Filipino:50,Ghanaian:24,Kenyan:32,Indonesian:46,Brazilian:62,Chinese:50,Russian:54,Ukrainian:60,Moroccan:38,Turkish:48,Other:40}
+  },
+  {
+    country:'Germany (Schengen)', flag:'🇩🇪',
+    name:'Job Seeker Visa (6 months)',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:5604,     // €934 x 6 months
+      min_education:'bachelor',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'University degree recognized in Germany (check anabin database)',
+      '€5,604 in savings or blocked account (€934 × 6 months)',
+      'Health insurance valid in Germany',
+      'German OR English proficiency for your field'
+    ],
+    bank_statement:'€5,604 (€934/month × 6 months) — blocked account at Deutsche Bank/Fintiba OR bank letter showing this amount',
+    bank_months:'Full 6-month amount must be available at once',
+    documents:['Valid passport','University degree with certified German/English translation','CV in Europass format','Bank letter or blocked account confirmation (€5,604)','Health insurance certificate','German/English language certificate','Motivation letter','Passport photos'],
+    processing:'4–8 weeks',
+    fee:'€75',
+    pr_path:'Find job → Employment Visa → 4 years → Permanent Residence → 8 years total → Citizenship (3 years if well-integrated)',
+    refusal_reasons:['Degree not recognized in Germany','Insufficient funds','Language skills insufficient','Incomplete documents'],
+    approval:{Pakistani:50,Indian:58,Nigerian:38,Bangladeshi:44,Egyptian:46,Filipino:53,Ghanaian:36,Kenyan:42,Indonesian:48,Brazilian:56,Chinese:54,Russian:52,Ukrainian:58,Moroccan:44,Turkish:50,Other:46}
+  },
+  {
+    country:'Germany (Schengen)', flag:'🇩🇪',
+    name:'Student Visa',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:11208,    // €934 x 12
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Admission from German university (public unis often FREE)',
+      'Blocked account: €11,208 (€934 × 12 months)',
+      'Health insurance',
+      'German A2/B1 OR English proof for English programs'
+    ],
+    bank_statement:'€11,208 in blocked account — mandatory before visa (cannot use regular bank statement)',
+    bank_months:'Blocked account only — full year upfront',
+    documents:['University admission letter','Valid passport','Blocked account confirmation (Fintiba/Expatrio/Deutsche Bank)','Health insurance','Language certificate','Academic transcripts and certificates','APS certificate (India, China, Vietnam — mandatory)','Passport photos','Motivation letter'],
+    processing:'4–12 weeks',
+    fee:'€75',
+    pr_path:'18-month job seeker visa after graduation → employment visa → 4 years → PR → citizenship',
+    refusal_reasons:['No blocked account (must be blocked account — regular statement not accepted)','APS certificate missing (India/China)','Language proof insufficient','Academic qualifications not meeting German standards'],
+    approval:{Pakistani:57,Indian:63,Nigerian:43,Bangladeshi:49,Egyptian:51,Filipino:59,Ghanaian:41,Kenyan:47,Indonesian:53,Brazilian:60,Chinese:58,Russian:55,Ukrainian:61,Moroccan:49,Turkish:56,Other:50}
+  },
+  {
+    country:'Germany (Schengen)', flag:'🇩🇪',
+    name:'EU Blue Card',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:2900,      // €45,300/year = ~$2,900/month
+      min_savings_usd:0,
+      min_education:'bachelor',
+      english_min:3,
+      age_max:999,
+      criminal:false,
+      min_experience_years:0
+    },
+    free_reqs:[
+      'University degree (minimum 3 years, comparable to German standard)',
+      'Job offer: €45,300+/year (~$2,900/month)',
+      'Shortage occupation: €35,100/year (~$2,250/month)',
+      'Degree recognized in Germany'
+    ],
+    bank_statement:'No bank statement needed — salary requirement covers this',
+    bank_months:'N/A',
+    documents:['Valid passport','Degree with recognition/comparability','Job contract with salary','Health insurance','CV'],
+    processing:'4–8 weeks',
+    fee:'€100',
+    pr_path:'21 months → Permanent Residence (with B1 German) OR 33 months without → Citizenship after 8 years',
+    refusal_reasons:['Salary below threshold','Degree not comparable','Occupation not qualifying'],
+    approval:{Pakistani:57,Indian:64,Nigerian:44,Bangladeshi:50,Egyptian:52,Filipino:60,Ghanaian:42,Kenyan:48,Indonesian:54,Brazilian:61,Chinese:59,Russian:56,Ukrainian:62,Moroccan:49,Turkish:56,Other:51}
+  },
+
+  // ════════════════ PORTUGAL ════════════════
+  {
+    country:'Portugal', flag:'🇵🇹',
+    name:'Digital Nomad Visa (D8)',
+    goal:['work','settle','nomad'],
+    requires:{
+      min_income_usd:3300,      // €3,040/month
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Minimum income: €3,040/month (~$3,300) from remote work',
+      'Employment contract or freelance proof (non-Portuguese employer)',
+      'Health insurance covering Portugal'
+    ],
+    bank_statement:'€3,040/month × 3 months = €9,120 shown OR consistent monthly transfers',
+    bank_months:'3 months of bank statements showing income',
+    documents:['Valid passport','Criminal record certificate (apostilled in home country)','Health insurance (full coverage)','Remote work contract OR freelance registration','Bank statements (3 months)','Proof of accommodation in Portugal (lease or hotel)','NIF application','Passport photos','Application form'],
+    processing:'1–3 months',
+    fee:'€90 visa + €72 residence permit',
+    pr_path:'5 years → Permanent Residence → 5 years PR → Portuguese/EU citizenship in 5th year of residence',
+    refusal_reasons:['Income below €3,040/month','Working for Portuguese company (not allowed)','No health insurance','Criminal record','Insufficient documentation'],
+    approval:{Pakistani:57,Indian:62,Nigerian:48,Bangladeshi:52,Egyptian:54,Filipino:60,Ghanaian:46,Kenyan:50,Indonesian:55,Brazilian:66,Chinese:59,Russian:57,Ukrainian:61,Moroccan:52,Turkish:57,Other:53}
+  },
+  {
+    country:'Portugal', flag:'🇵🇹',
+    name:'Student Visa (D4)',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:7600,     // €760/month x 10 months
+      min_education:'secondary',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Acceptance from Portuguese university or language school',
+      'Funds: €760/month for study duration',
+      'Health insurance in Portugal'
+    ],
+    bank_statement:'€760/month × study duration — minimum €7,600 for 10 months',
+    bank_months:'3–6 months showing consistent balance',
+    documents:['University acceptance letter','Valid passport','Bank statements','Health insurance','Language certificate','Academic transcripts','Criminal record certificate','Accommodation proof (student residence or lease)','Passport photos'],
+    processing:'2–3 months',
+    fee:'€90 visa + €72 residence permit',
+    pr_path:'Graduate → Job seeker visa → Work visa → 5 years → PR → Citizenship',
+    refusal_reasons:['Insufficient funds','No language proof for Portuguese-medium courses','Weak academic record'],
+    approval:{Pakistani:54,Indian:61,Nigerian:44,Bangladeshi:49,Egyptian:51,Filipino:57,Ghanaian:42,Kenyan:47,Indonesian:52,Brazilian:63,Chinese:56,Russian:55,Ukrainian:59,Moroccan:49,Turkish:53,Other:49}
+  },
+  {
+    country:'Portugal', flag:'🇵🇹',
+    name:'Golden Visa (ARI Program)',
+    goal:['invest','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:550000,   // €500k investment
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Investment minimum: €500,000 (fund/capital transfer) or create 10 jobs',
+      'Clean criminal record',
+      'Health insurance'
+    ],
+    bank_statement:'€500,000+ investment proof + source of funds documentation',
+    bank_months:'Source of funds documentation — typically 2–3 years',
+    documents:['Proof of investment','Valid passport','Criminal record certificate (apostilled)','Health insurance','NIF (tax number)','NISS','Source of funds documentation','Bank reference letter'],
+    processing:'6–12 months',
+    fee:'€5,325 application + annual renewal fees',
+    pr_path:'5 years → Permanent Residence immediately (maintaining investment) → Citizenship after 5 years',
+    refusal_reasons:['Investment below threshold','Criminal record','Source of funds unclear or suspicious'],
+    approval:{Pakistani:70,Indian:73,Nigerian:62,Bangladeshi:66,Egyptian:68,Filipino:70,Ghanaian:60,Kenyan:64,Indonesian:68,Brazilian:72,Chinese:74,Russian:65,Ukrainian:68,Moroccan:64,Turkish:69,Other:65}
+  },
+
+  // ════════════════ UAE ════════════════
+  {
+    country:'UAE', flag:'🇦🇪',
+    name:'Employment Visa',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false,
+      special:'job_offer_uae'
+    },
+    free_reqs:[
+      'Job offer from UAE-registered company',
+      'Employer initiates and sponsors the process',
+      'Pass medical fitness test in UAE',
+      'Educational certificates attested'
+    ],
+    bank_statement:'No bank statement — employer handles all costs',
+    bank_months:'N/A',
+    documents:['Valid passport (6+ months)','Passport photos','Educational certificates (attested by home country + UAE embassy)','Employment contract','Medical fitness test (done in UAE on arrival)'],
+    processing:'1–4 weeks',
+    fee:'AED 3,000–5,000 (~$820–$1,360) usually paid by employer',
+    pr_path:'Renewable 2-year employment visa → Golden Visa (10yr) for exceptional talent or high earners',
+    refusal_reasons:['Failed medical test','Fraudulent documents','Security concerns','Profession banned for certain nationalities'],
+    approval:{Pakistani:80,Indian:84,Nigerian:60,Bangladeshi:76,Egyptian:78,Filipino:83,Ghanaian:58,Kenyan:63,Indonesian:76,Brazilian:68,Chinese:70,Russian:72,Ukrainian:74,Moroccan:70,Turkish:76,Other:68}
+  },
+  {
+    country:'UAE', flag:'🇦🇪',
+    name:'Freelancer / Remote Work Visa',
+    goal:['work','nomad'],
+    requires:{
+      min_income_usd:3500,      // $3,500/month minimum
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Minimum income: $3,500/month from freelance/remote work',
+      'Health insurance',
+      'Clean background check'
+    ],
+    bank_statement:'$3,500/month income proof — 3–6 months bank statements showing transfers',
+    bank_months:'3–6 months',
+    documents:['Valid passport','Freelance contracts or employment proof (remote)','Bank statements','Health insurance','Background check certificate','Passport photos'],
+    processing:'2–4 weeks',
+    fee:'AED 3,700 (~$1,000)',
+    pr_path:'Annual renewal → Golden Visa after high earnings/achievements',
+    refusal_reasons:['Insufficient income proof','No health insurance'],
+    approval:{Pakistani:68,Indian:72,Nigerian:55,Bangladeshi:63,Egyptian:66,Filipino:70,Ghanaian:53,Kenyan:58,Indonesian:64,Brazilian:68,Chinese:66,Russian:64,Ukrainian:66,Moroccan:62,Turkish:67,Other:60}
+  },
+  {
+    country:'UAE', flag:'🇦🇪',
+    name:'Golden Visa (10 years)',
+    goal:['invest','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:545000,   // AED 2,000,000
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Investment AED 2,000,000 (~$545,000) in property or business',
+      'OR exceptional talent recognized by relevant authority',
+      'OR outstanding student (GPA 3.75+)'
+    ],
+    bank_statement:'AED 2,000,000 investment proof + source of funds',
+    bank_months:'Investment documentation',
+    documents:['Valid passport','Investment/property proof','Source of funds','Medical test','Emirates ID application'],
+    processing:'2–4 weeks',
+    fee:'AED 2,800 (~$760)',
+    pr_path:'10-year renewable — effectively permanent residency in UAE',
+    refusal_reasons:['Investment below threshold','Background concerns'],
+    approval:{Pakistani:76,Indian:80,Nigerian:65,Bangladeshi:70,Egyptian:73,Filipino:76,Ghanaian:62,Kenyan:66,Indonesian:70,Brazilian:74,Chinese:76,Russian:70,Ukrainian:72,Moroccan:68,Turkish:72,Other:65}
+  },
+
+  // ════════════════ MALAYSIA ════════════════
+  {
+    country:'Malaysia', flag:'🇲🇾',
+    name:'DE Rantau (Digital Nomad Pass)',
+    goal:['work','nomad'],
+    requires:{
+      min_income_usd:2000,      // $24,000/year = $2,000/month
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Minimum income: USD $2,000/month from remote work',
+      'Employment outside Malaysia',
+      'Health insurance'
+    ],
+    bank_statement:'$2,000/month income — 3 months bank statements',
+    bank_months:'3 months',
+    documents:['Valid passport','Employment/freelance proof','Bank statements (3 months)','Health insurance','Application form','Passport photos'],
+    processing:'2–4 weeks',
+    fee:'USD $1,000 single / $1,500 family',
+    pr_path:'No direct PR — but can apply for Malaysia My Second Home (MM2H) after longer stays',
+    refusal_reasons:['Income below threshold','Working for Malaysian company','Insufficient documentation'],
+    approval:{Pakistani:68,Indian:72,Nigerian:57,Bangladeshi:63,Egyptian:65,Filipino:70,Ghanaian:55,Kenyan:59,Indonesian:66,Brazilian:68,Chinese:66,Russian:63,Ukrainian:65,Moroccan:60,Turkish:65,Other:60}
+  },
+  {
+    country:'Malaysia', flag:'🇲🇾',
+    name:'Student Pass',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:3000,
+      min_education:'secondary',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Acceptance from Malaysian institution',
+      'Financial proof: RM 14,400/year (~$3,000)',
+      'Health insurance and medical exam'
+    ],
+    bank_statement:'RM 14,400 (~$3,000) per year — 3–6 months statements',
+    bank_months:'3–6 months',
+    documents:['Acceptance letter','Valid passport','Bank statements','Health insurance','Academic transcripts','Medical exam','Passport photos'],
+    processing:'2–6 weeks',
+    fee:'RM 500 (~$110)',
+    pr_path:'Limited — long-term stay → Malaysia My Second Home program possible',
+    refusal_reasons:['Insufficient funds','Medical issues'],
+    approval:{Pakistani:66,Indian:70,Nigerian:55,Bangladeshi:60,Egyptian:62,Filipino:68,Ghanaian:53,Kenyan:57,Indonesian:64,Brazilian:66,Chinese:64,Russian:61,Ukrainian:63,Moroccan:58,Turkish:63,Other:58}
+  },
+  {
+    country:'Malaysia', flag:'🇲🇾',
+    name:'Employment Pass (EP)',
+    goal:['work'],
+    requires:{
+      min_income_usd:1100,      // RM 5,000/month
+      min_savings_usd:0,
+      min_education:'secondary',
+      english_min:0,
+      age_max:999,
+      criminal:false,
+      special:'job_offer_malaysia'
+    },
+    free_reqs:[
+      'Job offer from Malaysian company',
+      'Minimum salary RM 5,000/month (~$1,100)',
+      'Degree OR 5 years relevant experience'
+    ],
+    bank_statement:'No bank statement — employer sponsored',
+    bank_months:'N/A',
+    documents:['Valid passport','Employment contract','Degree or experience proof','CV','Passport photos','Medical exam'],
+    processing:'2–4 weeks',
+    fee:'RM 500 (~$110)',
+    pr_path:'5 years continuous EP → Permanent Residence application',
+    refusal_reasons:['Salary below minimum','Job could be filled locally','Document issues'],
+    approval:{Pakistani:70,Indian:74,Nigerian:57,Bangladeshi:63,Egyptian:65,Filipino:72,Ghanaian:55,Kenyan:59,Indonesian:68,Brazilian:66,Chinese:68,Russian:63,Ukrainian:65,Moroccan:60,Turkish:66,Other:60}
+  },
+
+  // ════════════════ TURKEY ════════════════
+  {
+    country:'Turkey', flag:'🇹🇷',
+    name:'Tourist Visa / e-Visa',
+    goal:['visit'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:500,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Valid passport',
+      'Return ticket and hotel booking',
+      'Basic funds (~$50/day)'
+    ],
+    bank_statement:'$500–$1,500 recommended — 1–3 months statements',
+    bank_months:'1–3 months',
+    documents:['Valid passport','e-Visa confirmation','Return ticket','Hotel booking','Bank statements'],
+    processing:'24–72 hours (online)',
+    fee:'$60–$100 (varies by nationality)',
+    pr_path:'None directly',
+    refusal_reasons:['Security concerns','Invalid passport'],
+    approval:{Pakistani:82,Indian:85,Nigerian:64,Bangladeshi:78,Egyptian:82,Filipino:80,Ghanaian:61,Kenyan:66,Indonesian:77,Brazilian:82,Chinese:80,Russian:84,Ukrainian:82,Moroccan:78,Turkish:0,Other:72}
+  },
+  {
+    country:'Turkey', flag:'🇹🇷',
+    name:'Short-Term Residence Permit',
+    goal:['work','settle','nomad'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:3000,     // approx $500/month x 6
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Enter Turkey legally (visa-free or e-visa)',
+      'Proof of accommodation (lease agreement)',
+      'Health insurance in Turkey',
+      'Sufficient funds: ~$500/month'
+    ],
+    bank_statement:'$3,000–$6,000 for 1-year permit — bank statements or income proof',
+    bank_months:'3–6 months',
+    documents:['Valid passport','Proof of accommodation (signed lease)','Health insurance','Bank statements','Turkish tax number','Application form','Biometric photos'],
+    processing:'2–4 weeks',
+    fee:'$200–$400',
+    pr_path:'8 years legal residence → Long-Term Residence Permit → Citizenship after 5 years of long-term permit (or exceptional contribution)',
+    refusal_reasons:['No accommodation proof','Insufficient funds','No health insurance'],
+    approval:{Pakistani:76,Indian:78,Nigerian:60,Bangladeshi:72,Egyptian:76,Filipino:74,Ghanaian:58,Kenyan:62,Indonesian:72,Brazilian:76,Chinese:74,Russian:78,Ukrainian:76,Moroccan:72,Turkish:0,Other:65}
+  },
+  {
+    country:'Turkey', flag:'🇹🇷',
+    name:'Student Residence Permit',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:2000,
+      min_education:'secondary',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Enrollment in Turkish university',
+      '$300/month income or family support',
+      'Health insurance'
+    ],
+    bank_statement:'$2,000–$3,600 per year shown',
+    bank_months:'3–6 months',
+    documents:['University enrollment','Valid passport','Bank statements','Health insurance','Accommodation proof'],
+    processing:'2–3 weeks',
+    fee:'$150–$200',
+    pr_path:'Residence → Short-term → Long-term (8yr) → Citizenship',
+    refusal_reasons:['Not enrolled in institution','Insufficient funds'],
+    approval:{Pakistani:80,Indian:82,Nigerian:64,Bangladeshi:76,Egyptian:80,Filipino:78,Ghanaian:61,Kenyan:65,Indonesian:75,Brazilian:80,Chinese:78,Russian:82,Ukrainian:80,Moroccan:76,Turkish:0,Other:70}
+  },
+
+  // ════════════════ NEW ZEALAND ════════════════
+  {
+    country:'New Zealand', flag:'🇳🇿',
+    name:'Skilled Migrant Category',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:1900,
+      min_education:'bachelor',
+      english_min:4,
+      age_max:55,
+      criminal:false,
+      min_experience_years:1
+    },
+    free_reqs:[
+      'Score 160+ on NZ points test',
+      'Job offer in NZ strongly recommended',
+      'IELTS 6.5 overall minimum',
+      'Under 56 years old',
+      'Health and character requirements'
+    ],
+    bank_statement:'NZD $4,200 (~$2,500 USD) per person — 3 months statements',
+    bank_months:'3 months',
+    documents:['Valid passport','IELTS results','Skills assessment','Job offer (preferred)','Work experience proof','Police clearance','Medical exam'],
+    processing:'6–24 months',
+    fee:'NZD $3,210 (~$1,900 USD)',
+    pr_path:'Direct PR → Citizenship after 5 years (1 year as PR)',
+    refusal_reasons:['Points below 160','Health issues','Character issues','Age over 55'],
+    approval:{Pakistani:59,Indian:67,Nigerian:49,Bangladeshi:54,Egyptian:52,Filipino:63,Ghanaian:47,Kenyan:52,Indonesian:55,Brazilian:59,Chinese:61,Russian:58,Ukrainian:61,Moroccan:50,Turkish:56,Other:52}
+  },
+  {
+    country:'New Zealand', flag:'🇳🇿',
+    name:'Student Visa',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:12000,
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Offer of place from NZ institution',
+      'NZD $15,000/year living (~$9,000 USD) + tuition',
+      'Health insurance (OSHC)',
+      'English: IELTS 5.5+'
+    ],
+    bank_statement:'NZD $15,000 (~$9,000 USD) + tuition — 3–6 months bank statements',
+    bank_months:'3–6 months',
+    documents:['Offer of place letter','Valid passport','Bank statements','Health insurance','IELTS results','Police clearance (some)'],
+    processing:'4–8 weeks',
+    fee:'NZD $375 (~$230 USD)',
+    pr_path:'Post-study work → Skilled Migrant → PR → Citizenship',
+    refusal_reasons:['Insufficient funds','English below requirement','Weak study intentions'],
+    approval:{Pakistani:52,Indian:61,Nigerian:42,Bangladeshi:47,Egyptian:49,Filipino:59,Ghanaian:40,Kenyan:45,Indonesian:51,Brazilian:57,Chinese:56,Russian:57,Ukrainian:61,Moroccan:45,Turkish:52,Other:47}
+  },
+
+  // ════════════════ IRELAND ════════════════
+  {
+    country:'Ireland', flag:'🇮🇪',
+    name:'Critical Skills Employment Permit',
+    goal:['work','settle'],
+    requires:{
+      min_income_usd:2000,      // €32,000/year = ~$2,000/month
+      min_savings_usd:0,
+      min_education:'bachelor',
+      english_min:3,
+      age_max:999,
+      criminal:false,
+      special:'job_offer_ireland'
+    },
+    free_reqs:[
+      'Job offer paying €32,000+/year (~$2,000/month)',
+      'University degree required for most occupations',
+      'Employer registered in Ireland',
+      'Occupation on Critical Skills List'
+    ],
+    bank_statement:'No bank statement — salary requirement',
+    bank_months:'N/A',
+    documents:['Valid passport','Job offer letter','Degree certificate','CV','Employer Reg. number'],
+    processing:'1–3 months',
+    fee:'€1,000 (12 months) / €500 (under 6 months)',
+    pr_path:'2 years → Stamp 4 (work freely) → 5 years → Irish citizenship',
+    refusal_reasons:['Salary below threshold','Occupation not on Critical Skills list','No Irish employer'],
+    approval:{Pakistani:59,Indian:67,Nigerian:49,Bangladeshi:54,Egyptian:52,Filipino:62,Ghanaian:47,Kenyan:52,Indonesian:55,Brazilian:61,Chinese:59,Russian:57,Ukrainian:62,Moroccan:50,Turkish:57,Other:52}
+  },
+  {
+    country:'Ireland', flag:'🇮🇪',
+    name:'Student Visa',
+    goal:['study'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:7000,
+      min_education:'secondary',
+      english_min:3,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Offer from Irish institution',
+      'Funds: €7,000+/year',
+      'English proficiency',
+      'Genuine study intention'
+    ],
+    bank_statement:'€7,000/year minimum — 3–6 months bank statements',
+    bank_months:'3–6 months',
+    documents:['College offer letter','Valid passport','Bank statements','English proof','Academic transcripts'],
+    processing:'4–8 weeks',
+    fee:'€60',
+    pr_path:'Third Level Graduate Programme (2 years) → General Work Permit → Stamp 4 → Citizenship after 5 years',
+    refusal_reasons:['Insufficient funds','Weak English','No genuine study intention'],
+    approval:{Pakistani:52,Indian:61,Nigerian:41,Bangladeshi:47,Egyptian:49,Filipino:57,Ghanaian:39,Kenyan:45,Indonesian:51,Brazilian:58,Chinese:56,Russian:55,Ukrainian:60,Moroccan:46,Turkish:52,Other:47}
+  },
+
+  // ════════════════ GREECE ════════════════
+  {
+    country:'Greece', flag:'🇬🇷',
+    name:'Golden Visa (€250k Property)',
+    goal:['invest','settle'],
+    requires:{
+      min_income_usd:0,
+      min_savings_usd:280000,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Property purchase minimum €250,000 (~$270,000)',
+      'Clean criminal record',
+      'Health insurance'
+    ],
+    bank_statement:'€250,000 property purchase + source of funds documentation',
+    bank_months:'Source of funds — 2–3 years',
+    documents:['Property purchase deed','Valid passport','Criminal record certificate','Health insurance','Tax clearance','Greek tax number (AFM)','Greek bank account'],
+    processing:'2–4 months',
+    fee:'€2,000 + property taxes and legal fees',
+    pr_path:'5 years → Permanent Residence → 7 years total → Greek/EU Citizenship',
+    refusal_reasons:['Property below €250k','Criminal record','Source of funds suspicious'],
+    approval:{Pakistani:70,Indian:73,Nigerian:62,Bangladeshi:66,Egyptian:68,Filipino:70,Ghanaian:59,Kenyan:63,Indonesian:68,Brazilian:72,Chinese:74,Russian:62,Ukrainian:66,Moroccan:63,Turkish:68,Other:63}
+  },
+  {
+    country:'Greece', flag:'🇬🇷',
+    name:'Digital Nomad Visa',
+    goal:['work','nomad','settle'],
+    requires:{
+      min_income_usd:3800,      // €3,500/month
+      min_savings_usd:0,
+      min_education:'none',
+      english_min:0,
+      age_max:999,
+      criminal:false
+    },
+    free_reqs:[
+      'Minimum income: €3,500/month (~$3,800) from remote work',
+      'Work for employer/clients OUTSIDE Greece',
+      'Health insurance',
+      'Proof of accommodation'
+    ],
+    bank_statement:'€3,500/month × 3 months = €10,500 shown',
+    bank_months:'3 months',
+    documents:['Valid passport','Remote work/freelance proof','Bank statements (3 months)','Health insurance','Criminal record certificate','Accommodation proof'],
+    processing:'4–8 weeks',
+    fee:'€75',
+    pr_path:'5 years → Permanent Residence → 7 years → Greek Citizenship',
+    refusal_reasons:['Income below €3,500/month','Working for Greek company','Incomplete documents'],
+    approval:{Pakistani:55,Indian:61,Nigerian:45,Bangladeshi:50,Egyptian:52,Filipino:58,Ghanaian:43,Kenyan:47,Indonesian:53,Brazilian:62,Chinese:57,Russian:54,Ukrainian:60,Moroccan:49,Turkish:55,Other:50}
+  },
+];
+
+// ─── PROFILE PARSING ──────────────────────────────────────────────────────────
+function parseProfile(a) {
+  return {
+    nationality: detectNat(a.nationality || ''),
+    nat_raw: a.nationality || '',
+    has_dual: (a.other_passport || '').includes('2') || (a.other_passport || '').includes('3'),
+    age_num: parseAge(a.age || ''),
+    edu_level: parseEdu(a.education || ''),
+    experience_years: parseExp(a.experience || ''),
+    monthly_income_usd: parseIncome(a.monthly_income || ''),
+    savings_usd: parseSavings(a.savings || ''),
+    english_level: parseEnglish(a.english || ''),
+    goal: parseGoal(a.goal || ''),
+    criminal: (a.criminal || '').toLowerCase().includes('conviction'),
+    field: a.field || '',
+    current_country: a.current_country || '',
+  };
+}
+
+function detectNat(s){
+  const m={pakistan:'Pakistani',india:'Indian',nigeria:'Nigerian',bangladesh:'Bangladeshi',egypt:'Egyptian',philippines:'Filipino',ghana:'Ghanaian',kenya:'Kenyan',indonesia:'Indonesian',brazil:'Brazilian',china:'Chinese',russia:'Russian',ukraine:'Ukrainian',morocco:'Moroccan',turkey:'Turkish'};
+  const l=s.toLowerCase();
+  for(let k of Object.keys(m)) if(l.includes(k)) return m[k];
+  return 'Other';
+}
+
+function parseAge(s){
+  if(s.includes('18')) return 22;
+  if(s.includes('26')) return 28;
+  if(s.includes('31')) return 33;
+  if(s.includes('36')) return 38;
+  if(s.includes('41')) return 45;
+  if(s.includes('51')) return 55;
+  return 30;
+}
+
+function parseEdu(s){
+  if(s.includes('PhD')) return 6;
+  if(s.includes('Master')) return 5;
+  if(s.includes('Bachelor')) return 4;
+  if(s.includes('diploma') || s.includes('College')) return 3;
+  if(s.includes('school') || s.includes('Matric') || s.includes('High')) return 2;
+  if(s.includes('No formal')) return 1;
+  return 1;
+}
+
+function parseExp(s){
+  if(s.includes('10')) return 12;
+  if(s.includes('6')) return 8;
+  if(s.includes('3')) return 4;
+  if(s.includes('1')) return 1.5;
+  if(s.includes('Less')) return 0.5;
+  return 0;
+}
+
+function parseIncome(s){
+  if(s.includes('7,000') || s.includes('Over')) return 8000;
+  if(s.includes('4,000')) return 5500;
+  if(s.includes('2,000')) return 3000;
+  if(s.includes('1,000')) return 1500;
+  if(s.includes('500')) return 750;
+  if(s.includes('Under $500')) return 300;
+  return 0;
+}
+
+function parseSavings(s){
+  if(s.includes('50,000') || s.includes('Over')) return 60000;
+  if(s.includes('20,000')) return 35000;
+  if(s.includes('8,000')) return 14000;
+  if(s.includes('3,000')) return 5500;
+  if(s.includes('1,000')) return 2000;
+  return 500;
+}
+
+function parseEnglish(s){
+  if(s.includes('Proficient') || s.includes('Native')) return 6;
+  if(s.includes('Advanced')) return 5;
+  if(s.includes('Upper')) return 4;
+  if(s.includes('Intermediate')) return 3;
+  if(s.includes('Basic')) return 2;
+  if(s.includes('No English')) return 0;
+  return 1;
+}
+
+function parseGoal(s){
+  if(s.includes('Visit') || s.includes('Tourism')) return 'visit';
+  if(s.includes('Work abroad') || s.includes('employed')) return 'work';
+  if(s.includes('Study')) return 'study';
+  if(s.includes('Settle') || s.includes('citizen')) return 'settle';
+  if(s.includes('Remote') || s.includes('nomad')) return 'nomad';
+  if(s.includes('Invest') || s.includes('business')) return 'invest';
+  if(s.includes('family')) return 'family';
+  return 'work';
+}
+
+function eduLabel(n){
+  const m={1:'No formal degree',2:'High school',3:'College diploma',4:'Bachelor\'s degree',5:'Master\'s degree',6:'PhD'};
+  return m[n] || 'Unknown';
+}
+
+// ─── ELIGIBILITY ENGINE ───────────────────────────────────────────────────────
+function checkEligibility(visa, profile) {
+  const r = visa.requires;
+  const reasons = [];
+  let eligible = true;
+
+  // Goal match
+  const goalMatch = visa.goal.some(g => {
+    if(g === profile.goal) return true;
+    if(g === 'settle' && profile.goal === 'work') return true;
+    if(g === 'work' && profile.goal === 'settle') return true;
+    if(g === 'nomad' && profile.goal === 'work') return true;
+    return false;
+  });
+  if(!goalMatch){
+    return {eligible:false, reasons:[`This visa is for ${visa.goal.join('/')} — your goal is ${profile.goal}`]};
+  }
+
+  // Criminal
+  if(r.criminal === false && profile.criminal){
+    eligible = false;
+    reasons.push('Criminal conviction disqualifies from this visa');
+  }
+
+  // Age
+  if(r.age_max && profile.age_num > r.age_max){
+    eligible = false;
+    reasons.push(`Age limit is ${r.age_max} years — you are ${profile.age_num}`);
+  }
+
+  // Income
+  if(r.min_income_usd > 0 && profile.monthly_income_usd < r.min_income_usd){
+    eligible = false;
+    reasons.push(`Requires $${r.min_income_usd.toLocaleString()}/month income — you have $${profile.monthly_income_usd.toLocaleString()}/month`);
+  }
+
+  // Savings
+  if(r.min_savings_usd > 0 && profile.savings_usd < r.min_savings_usd){
+    eligible = false;
+    const shortfall = r.min_savings_usd - profile.savings_usd;
+    reasons.push(`Requires $${r.min_savings_usd.toLocaleString()} in savings/funds — you have $${profile.savings_usd.toLocaleString()} (short by $${shortfall.toLocaleString()})`);
+  }
+
+  // Education
+  const eduReq = {none:0,secondary:2,diploma:3,bachelor:4,master:5,phd:6}[r.min_education || 'none'] || 0;
+  if(profile.edu_level < eduReq){
+    eligible = false;
+    reasons.push(`Requires minimum ${r.min_education} degree — you have ${eduLabel(profile.edu_level)}`);
+  }
+
+  // English
+  if(r.english_min > 0 && profile.english_level < r.english_min){
+    eligible = false;
+    const englishLabels = {1:'Basic',2:'Basic',3:'Intermediate',4:'Upper-intermediate (IELTS 6.0)',5:'Advanced (IELTS 7.0)',6:'Proficient'};
+    reasons.push(`Requires ${englishLabels[r.english_min]} English — your level is lower`);
+  }
+
+  // Experience
+  if(r.min_experience_years && profile.experience_years < r.min_experience_years){
+    eligible = false;
+    reasons.push(`Requires ${r.min_experience_years}+ year(s) work experience — you have ${profile.experience_years < 1 ? 'less than 1 year' : profile.experience_years + ' years'}`);
+  }
+
+  return {eligible, reasons};
+}
+
+// ─── IMPROVEMENT SUGGESTIONS ──────────────────────────────────────────────────
+function generateSuggestions(profile, notEligible) {
+  const sugs = [];
+
+  const needsDegree = notEligible.some(v => v.reasons.some(r => r.includes('degree')));
+  const needsEnglish = notEligible.some(v => v.reasons.some(r => r.includes('English')));
+  const needsIncome = notEligible.some(v => v.reasons.some(r => r.includes('income')));
+  const needsSavings = notEligible.some(v => v.reasons.some(r => r.includes('savings')));
+  const needsExp = notEligible.some(v => v.reasons.some(r => r.includes('experience')));
+
+  if(needsEnglish){
+    sugs.push({
+      icon:'📚', title:'Improve English to IELTS 6.0+',
+      items:[
+        'Take a 3–6 month English course (online or in-person)',
+        'Practice with apps: Duolingo, IELTS Prep, British Council',
+        'Target IELTS 6.0 — this unlocks UK, Canada, Australia, New Zealand, Ireland'
+      ],
+      unlocks:'UK Student Visa, Canada Express Entry, Australia Skilled, New Zealand'
+    });
+  }
+
+  if(needsSavings && profile.savings_usd < 5000){
+    sugs.push({
+      icon:'💰', title:'Build your savings to $5,000–$15,000',
+      items:[
+        'Even $5,000 opens Turkey residence permit and Malaysia student options',
+        '$10,000 opens Canada student permit (with family support letter)',
+        '$13,000 opens Canada Express Entry proof of funds',
+        'Show savings growth over 3–6 months in your bank account'
+      ],
+      unlocks:'Turkey, Malaysia, Schengen tourist, Canada Student, Portugal Student'
+    });
+  }
+
+  if(needsIncome && profile.monthly_income_usd < 2000){
+    sugs.push({
+      icon:'💼', title:'Increase income to $2,000–$3,500/month',
+      items:[
+        'Learn high-demand skills: coding, digital marketing, graphic design',
+        'Work remotely for international clients via Upwork/Fiverr',
+        '$2,000/month unlocks Portugal D8, UAE Freelancer, Malaysia DE Rantau',
+        '$3,500/month unlocks Greece Digital Nomad, UAE remote work visa'
+      ],
+      unlocks:'Portugal Digital Nomad, UAE Freelancer, Malaysia DE Rantau, Greece Digital Nomad'
+    });
+  }
+
+  if(needsDegree && profile.edu_level < 4){
+    sugs.push({
+      icon:'🎓', title:'Get a recognized degree or certification',
+      items:[
+        'Online degrees from accredited universities (University of London, etc.)',
+        'Professional certifications (Google, AWS, Microsoft) accepted in IT field',
+        'A bachelor\'s degree unlocks Canada, UK, Australia, Germany, Ireland, NZ skilled worker visas',
+        'Consider starting with a diploma (2 years) which opens some options'
+      ],
+      unlocks:'Canada Express Entry, UK Skilled Worker, Australia 189, Germany Blue Card, Ireland, New Zealand'
+    });
+  }
+
+  if(needsExp){
+    sugs.push({
+      icon:'⏳', title:'Build 1–3 years documented work experience',
+      items:[
+        'Get employment letters on company letterhead with salary and duties listed',
+        '1 year experience unlocks Canada Express Entry and New Zealand skilled',
+        '2 years unlocks Australia employer sponsored visa',
+        'Freelance work counts if documented with contracts and invoices'
+      ],
+      unlocks:'Canada Express Entry, Australia Employer Sponsored, New Zealand Skilled'
+    });
+  }
+
+  // Always suggest Turkey/Malaysia as accessible
+  if(profile.savings_usd >= 2000 && profile.goal !== 'visit'){
+    sugs.push({
+      icon:'🌍', title:'Consider Turkey or Malaysia as a stepping stone',
+      items:[
+        'Turkey residence permit is accessible with just $3,000 savings',
+        'Malaysia student pass starts from $3,000 in funds',
+        'Build work experience, savings, and language skills while abroad',
+        'Then upgrade to Canada, UK or Australia from a stronger position'
+      ],
+      unlocks:'Path to stronger countries after building experience abroad'
+    });
+  }
+
+  return sugs;
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+
+function startQuiz(){
+  document.getElementById('hero').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  renderStep();
+}
+
+function renderStep(){
+  const s = steps[current];
+  const pct = (current/steps.length)*100;
+  const sel = answers[s.id] || null;
+  const L = ['A','B','C','D','E','F','G','H','I'];
+  let inp = '';
+  if(s.type==='text'){
+    inp = `<input class="text-input" id="ti" type="text" placeholder="${s.ph}" value="${answers[s.id]||''}" oninput="ht(this.value)" onkeydown="if(event.key==='Enter')ns()">`;
+  } else {
+    const cls = s.grid ? 'options grid2' : 'options';
+    inp = `<div class="${cls}">${s.opts.map((o,i)=>`<button class="option${sel===o?' selected':''}" onclick="po('${o.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')""><div class="opt-icon">${L[i]}</div>${o}</button>`).join('')}</div>`;
+  }
+  const ok = s.type==='text' ? ((answers[s.id]||'').trim().length>0) : sel!==null;
+  document.getElementById('quiz-inner').innerHTML = `
+    ${current>0?`<button class="back-btn" onclick="gb()">← Back</button>`:''}
+    <div class="progress-info"><span class="progress-label">Question ${current+1} of ${steps.length}</span><span class="progress-label">${Math.round(pct)}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="q-step">Step ${current+1}</div>
+    <div class="q-text">${s.q}</div>
+    <div class="q-sub">${s.sub}</div>
+    ${inp}
+    <button class="next-btn" onclick="ns()" ${ok?'':'disabled'}>${current===steps.length-1?'Check my eligibility →':'Continue →'}</button>
+  `;
+  if(s.type==='text') setTimeout(()=>{const e=document.getElementById('ti');if(e)e.focus();},50);
+}
+
+function po(v){ answers[steps[current].id]=v; renderStep(); setTimeout(ns,200); }
+function ht(v){ answers[steps[current].id]=v; const b=document.querySelector('.next-btn'); if(b) b.disabled=v.trim().length===0; }
+function ns(){
+  const s=steps[current];
+  if(s.type==='text'){ const e=document.getElementById('ti'); if(e) answers[s.id]=e.value.trim(); if(!answers[s.id]) return; }
+  else { if(!answers[s.id]) return; }
+  current++;
+  if(current>=steps.length) showLoading();
+  else renderStep();
+}
+function gb(){ if(current>0){current--;renderStep();} }
+
+// ─── LOADING ──────────────────────────────────────────────────────────────────
+function showLoading(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('loading').style.display='block';
+  const ids=['lc1','lc2','lc3','lc4','lc5','lc6'];
+  ids.forEach((id,i)=>setTimeout(()=>{const e=document.getElementById(id);if(e)e.classList.add('done');},700*(i+1)));
+  setTimeout(showResults, 5500);
+}
+
+// ─── RESULTS ──────────────────────────────────────────────────────────────────
+function showResults(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('results').style.display='block';
+
+  const profile = parseProfile(answers);
+  const eligible = [];
+  const notEligible = [];
+
+  VISAS.forEach(visa => {
+    const check = checkEligibility(visa, profile);
+    if(check.eligible){
+      const ap = visa.approval[profile.nationality] || visa.approval['Other'] || 50;
+      eligible.push({visa, approval:ap, reasons:[]});
+    } else {
+      notEligible.push({visa, reasons:check.reasons});
+    }
+  });
+
+  eligible.sort((a,b)=>b.approval-a.approval);
+  const suggestions = generateSuggestions(profile, notEligible);
+
+  const sec = document.getElementById('results');
+
+  const profileLabel = `${profile.nat_raw} • ${answers.age} • ${answers.education} • $${profile.monthly_income_usd.toLocaleString()}/mo income • $${profile.savings_usd.toLocaleString()} savings • ${answers.english}`;
+
+  let html = `
+    <div class="results-header">
+      <h2>${eligible.length > 0 ? `✅ ${eligible.length} visa${eligible.length>1?'s':''} found for your profile` : '⚠️ Limited options found'}</h2>
+      <p>Honest eligibility check — only showing visas you actually qualify for</p>
+    </div>
+    <div class="score-summary">
+      <div class="score-row">
+        <span class="score-badge ${eligible.length>=3?'score-strong':eligible.length>=1?'score-medium':'score-weak'}">${eligible.length>=3?'Good profile':'Limited options'}</span>
+        <span style="font-size:13px;color:#666">${eligible.length} eligible • ${notEligible.length} not eligible</span>
+      </div>
+      <div class="profile-chips">
+        <span class="chip">🌍 ${profile.nat_raw}</span>
+        <span class="chip">🎯 ${answers.goal}</span>
+        <span class="chip">📚 ${answers.education}</span>
+        <span class="chip">💰 $${profile.monthly_income_usd.toLocaleString()}/mo</span>
+        <span class="chip">🏦 $${profile.savings_usd.toLocaleString()} savings</span>
+        <span class="chip">🗣️ ${answers.english}</span>
+      </div>
+    </div>
+  `;
+
+  // ELIGIBLE SECTION
+  if(eligible.length > 0){
+    html += `<div class="section-title">✅ Visas you currently qualify for</div>`;
+
+    eligible.forEach((item, idx) => {
+      const {visa, approval} = item;
+      const apClass = approval>=60?'approval-high':approval>=40?'approval-med':'approval-low';
+      const barClass = approval>=60?'bar-high':approval>=40?'bar-med':'bar-low';
+      const isTop = idx === 0;
+
+      const freeReqs = visa.free_reqs.slice(0,2);
+
+      html += `
+        <div class="visa-card${isTop?' top':''}">
+          <div class="visa-card-header">
+            <div class="country-flag">${visa.flag}</div>
+            <div class="visa-info">
+              <div class="visa-country">${visa.country}${isTop?' ⭐':''}</div>
+              <div class="visa-name">${visa.name}</div>
+            </div>
+            <div class="visa-right">
+              <div class="approval-num ${apClass}">${approval}%</div>
+              <div class="approval-tag">approval chance</div>
+              <div class="approval-bar"><div class="bar-fill ${barClass}" style="width:${approval}%"></div></div>
+            </div>
+          </div>
+          <div class="visa-card-body">
+            <div class="free-req-list">
+              ${freeReqs.map((r,i)=>`<div class="free-req"><div class="req-num">${i+1}</div><div>${r}</div></div>`).join('')}
+            </div>
+            <div class="meta-row">
+              <span class="meta-tag">⏱ ${visa.processing}</span>
+              <span class="meta-tag">💳 ${visa.fee}</span>
+              <span class="meta-tag ${approval>=60?'g':approval>=40?'o':'r'}">${approval>=60?'✓ Good chances':approval>=40?'⚠ Medium chances':'✗ Low chances'}</span>
+            </div>
+            <div class="locked-box">
+              <div class="lock-title">🔒 Full details locked</div>
+              <div class="lock-sub">Unlock exact bank statement amounts, complete document list, step-by-step process, top refusal reasons & PR pathway</div>
+              <div class="lock-items">
+                <div class="lock-line"></div>
+                <div class="lock-line w85"></div>
+                <div class="lock-line w70"></div>
+                <div class="lock-line w90"></div>
+                <div class="lock-line w60"></div>
+              </div>
+              <a href="${GUMROAD}" target="_blank" class="unlock-btn">Unlock Full Report — $9.99</a>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  } else {
+    html += `
+      <div class="no-options">
+        <div class="no-opt-icon">⚠️</div>
+        <div class="no-opt-title">No visas found for your current profile</div>
+        <div class="no-opt-sub">Based on your answers, your profile does not currently meet the minimum requirements for any of our tracked visa categories. This is honest — not every profile qualifies today. See the improvement plan below to understand what to change.</div>
+      </div>
+    `;
+  }
+
+  // NOT ELIGIBLE SECTION
+  if(notEligible.length > 0){
+    html += `<div class="section-title">❌ Visas you don't currently qualify for — and why</div>`;
+    notEligible.slice(0,8).forEach(item => {
+      html += `
+        <div class="not-eligible-card">
+          <div class="ne-header">
+            <div class="ne-flag">${item.visa.flag}</div>
+            <div>
+              <div class="ne-country">${item.visa.country}</div>
+              <div class="ne-visa">${item.visa.name}</div>
+            </div>
+            <div class="ne-badge">Not eligible</div>
+          </div>
+          <div class="reason-list">
+            ${item.reasons.map(r=>`<div class="reason"><div class="reason-x">✗</div><div>${r}</div></div>`).join('')}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // IMPROVEMENT SUGGESTIONS
+  if(suggestions.length > 0){
+    html += `<div class="section-title">🚀 Your profile improvement plan</div>`;
+    suggestions.forEach(s => {
+      html += `
+        <div class="improve-card">
+          <div class="improve-header">${s.icon} ${s.title}</div>
+          <div class="improve-list">
+            ${s.items.map(i=>`<div class="improve-item"><div class="improve-arrow">→</div><div>${i}</div></div>`).join('')}
+          </div>
+          <div class="improve-result">If you do this: ${s.unlocks}</div>
+        </div>
+      `;
+    });
+  }
+
+  // UPSELL
+  html += `
+    <div class="upsell-box">
+      <h3>🔓 Unlock Your Complete Report</h3>
+      <p>Get exact bank statement amounts, full document checklists, step-by-step application instructions, and the refusal reasons to avoid — for every visa you qualify for.</p>
+      <div class="upsell-features">
+        <div class="uf"><span class="uf-check">✓</span>Exact bank statement amount & duration required</div>
+        <div class="uf"><span class="uf-check">✓</span>Complete document checklist for each visa</div>
+        <div class="uf"><span class="uf-check">✓</span>Step-by-step application process</div>
+        <div class="uf"><span class="uf-check">✓</span>Top refusal reasons — what to avoid</div>
+        <div class="uf"><span class="uf-check">✓</span>PR and citizenship pathway timeline</div>
+        <div class="uf"><span class="uf-check">✓</span>Approval chance breakdown by nationality</div>
+      </div>
+      <div class="upsell-price">$9.99</div>
+      <div class="upsell-sub">One-time • Instant access</div>
+      <a href="${GUMROAD}" target="_blank" class="buy-btn">Get Full Report →</a>
+    </div>
+    <button class="restart-btn" onclick="restart()">← Start over with different answers</button>
+    <div style="height:40px"></div>
+  `;
+
+  sec.innerHTML = html;
+}
+
+function restart(){
+  current=0; answers={};
+  document.getElementById('results').style.display='none';
+  document.getElementById('hero').style.display='block';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
